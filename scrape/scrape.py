@@ -73,15 +73,11 @@ class Worker(threading.Thread):
             url = self.queue.get()
             try:
                 resp = self.s.get(url, headers={'X-name': f'agent {self.name}'})
-                logger.info(f'fetched {url} {resp.status_code}')
+                logger.info(f'{self.name} fetched {url} {resp.status_code}')
             except requests.exceptions.SSLError as err:
-                logger.error(f'fetching {url} failed with SSL error: {err}')
-                self.queue.task_done()
-                break
+                logger.error(f'{self.name} fetching {url} failed with SSL error: {err}')
             except requests.exceptions.ConnectionError as err:
-                logger.error(f'fetching {url} failed with Connection error: {err}')
-                self.queue.task_done()
-                break
+                logger.error(f'{self.name} fetching {url} failed with Connection error: {err}')
             finally:
                 self.queue.task_done()
         self.s.close()
