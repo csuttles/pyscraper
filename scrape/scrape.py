@@ -4,10 +4,8 @@ __author__ = 'csuttles'
 import argparse
 import logging
 import json
-import re
 import requests
-import subprocess as sp
-import shlex
+import sys
 import threading
 import time
 from queue import Queue
@@ -16,9 +14,10 @@ from queue import Queue
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", help="file to read (list of URLs to scrape)", action='store', default='list.txt')
 parser.add_argument("-l", "--logilfe", help="logfile to write", action='store', default='log.txt')
-parser.add_argument("-t", "--threads", help="number fo threads to run", action='store', default=6)
+parser.add_argument("-t", "--threads", help="number fo threads to run", action='store', default=6, type=int)
 parser.add_argument("-H", "--headers", help="headers to pass to the worker, specified in json format",
                     action='store', default='{"x-test": "ctlfish"}')
+parser.add_argument("--timeout", action='store', help="timeout for each request", default=None, type=int)
 parser.add_argument("-d", "--debug", help="enable debugging", action='store_true')
 args = parser.parse_args()
 
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     starttime = time.time()
-    print(args)
+    logger.debug(f'invoked with {args}')
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
@@ -38,22 +37,25 @@ def main():
     if args.headers:
         data['headers'] = json.loads(args.headers)
     data['logger'] = logger
+    if args.timeout:
+        data['timeout'] = args.timeout
 
     queue = Queue()
+
+    for x in range(args.threads):
+        worker = Worker(queue, data)
+        worker.name = f'agent {x}'
+        worker.daemon = True
+        worker.start()
 
     with open(args.file) as infile:
         for url in infile:
             url = url.strip()
             logger.info(f'queuing {url}')
             queue.put(url)
-
-    for x in range(args.threads):
-        worker = Worker(queue, data)
-        worker.name = f'agent {x}'
-        worker.start()
-
     queue.join()
     logger.info(f'took {time.time() - starttime}')
+    sys.exit(0)
 
 
 class Worker(threading.Thread):
@@ -72,7 +74,7 @@ class Worker(threading.Thread):
         while True:
             url = self.queue.get()
             try:
-                resp = self.s.get(url, headers={'X-name': f'agent {self.name}'})
+                resp = self.s.get(url, headers={'X-name': f'agent {self.name}'}, timeout=5)
                 logger.info(f'{self.name} fetched {url} {resp.status_code}')
             except requests.exceptions.SSLError as err:
                 logger.error(f'{self.name} fetching {url} failed with SSL error: {err}')
