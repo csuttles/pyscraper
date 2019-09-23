@@ -17,7 +17,7 @@ parser.add_argument("-l", "--logfile", help="logfile to write (default => log.tx
 parser.add_argument("-t", "--threads", help="number fo threads to run", action='store', default=6, type=int)
 parser.add_argument("-H", "--headers", help="headers to pass to the worker, specified in json format",
                     action='store', default='{"x-test": "ctlfish"}')
-parser.add_argument("--timeout", action='store', help="timeout for each request", default=None, type=int)
+parser.add_argument("--timeout", action='store', help="timeout for each request", default=1, type=int)
 parser.add_argument("-d", "--debug", help="enable debugging", action='store_true')
 args = parser.parse_args()
 
