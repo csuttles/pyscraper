@@ -12,8 +12,8 @@ from queue import Queue
 from requests.packages.urllib3.util.retry import Retry
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--file", help="file to read (list of URLs to scrape)", action='store', default='list.txt')
-parser.add_argument("-l", "--logfile", help="logfile to write", action='store', default='log.txt')
+parser.add_argument("-f", "--file", help="file to read (list of URLs to scrape, default => list.txt)", action='store', default='list.txt')
+parser.add_argument("-l", "--logfile", help="logfile to write (default => log.txt)", action='store', default='log.txt')
 parser.add_argument("-t", "--threads", help="number fo threads to run", action='store', default=6, type=int)
 parser.add_argument("-H", "--headers", help="headers to pass to the worker, specified in json format",
                     action='store', default='{"x-test": "ctlfish"}')
