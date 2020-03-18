@@ -7,7 +7,7 @@ It's simple enough to be easy to comprehend, but also exposes tunables and optio
 
 # Install
 * `git clone` this repo.
-* create a virtualenv: `virtualenv -p python3 venv`
+* create a virtualenv: `python3 -m venv venv`
 * activate venv: `. ./venv/bin/activate`
 * install requirements: `pip -r requirements.txt`
 * run the program, as described in "usage"
